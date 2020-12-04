@@ -1,0 +1,23 @@
+# Copyright 2020 - Offen Authors <hioffen@posteo.de>
+# SPDX-License-Identifier: Apache-2.0
+
+jobs:
+  server:
+    docker: circleci/golang:1.15
+    steps:
+     - cd server; go mod download; go clean -testcache
+     - cd server; make test
+  reuse:
+    docker: cimg/python:3.7
+    steps:
+     - name: Install tool
+       run: pip install --user fsfe-reuse
+       run_once: true
+     - name: Check for REUSE compliance
+       run: reuse lint
+  build:
+    env:
+      OFFEN_GIT_REVISION: test
+    steps:
+      - make build
+      - cp -r bin/* /__ci/workflow_shared
